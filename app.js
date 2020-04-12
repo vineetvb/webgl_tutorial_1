@@ -117,6 +117,41 @@ var InitDemo = function() {
 		console.error('Linker error for fragment Shader');
 		return;
 	}
+	// gl.validateProgram(program); //
 
+	// Create Buffer
+	// Basic triangle, without color.
+	var triangleVertices = [
+	0.0, 0.5,
+	-0.5, -0.5,
+	0.5, -0.5
+	] // CCW ordering
+
+	var triangleVertexBuffer = gl.createBuffer(); // << memory alloc on GPU
+	// Bind newly created buffer
+	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBuffer);
+	// buffers triangle data to last bound buffer object
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
+
+	var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
+	gl.vertexAttribPointer(
+		positionAttribLocation, // Attribute Location
+		2, // number of elements per attribute
+		gl.FLOAT, // Type of elements
+		gl.FALSE,
+		2 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
+		0// offset from beginning of vertex list
+		);
+
+	gl.enableVertexAttribArray(positionAttribLocation);
+
+	gl.useProgram(program);
+	gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+	// var loop = function(){
+	// 	updateworld();
+	// 	renderworld();
+	// }
 };
 
