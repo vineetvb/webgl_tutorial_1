@@ -18,8 +18,31 @@
 		- which goes to the screen
 		 
 	- opengl has its own coordinate system
-
 */
+
+
+var vertexShaderText = [
+'precision mediump float;',
+'',
+'attribute vec2 vertPosition;',
+'',
+'void main()',
+'{',
+	' gl_Position = vec4(vertPosition, 0.0, 1.0);',
+
+'}',
+].join('\n');
+
+// -----------------------------------------
+var fragmentShaderText = [
+'precision mediump float;',
+'',
+'void main()',
+'{',
+	' gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);',
+'}',
+].join('\n');
+
 var InitDemo = function() {
 	console.log('This wrks');	
 	// first step is to init webgl
@@ -61,11 +84,17 @@ var InitDemo = function() {
 	// 					vec3 vertColor
 	// Output:
 	//      varying: vec3 fragColor
-	function vertexShader(vertPosition, vertColor){
-
-	}
 
 	// Fragment Shader
 
+	var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+
+	var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+	gl.shaderSource(vertexShader, vertexShaderText);
+	gl.shaderSource(fragmentShader, fragmentShaderText);
+
+	gl.compileShader(vertexShader);
+	gl.compileShader(fragmentShader);
 };
 
