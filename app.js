@@ -101,6 +101,22 @@ var InitDemo = function() {
 	gl.compileShader(fragmentShader);
 		if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
 		console.error('Error compiling fragment Shader')
+		return;
 	}
+
+	var program = gl.createProgram();
+	gl.attachShader(program, vertexShader);
+	gl.attachShader(program, fragmentShader);
+	gl.linkProgram(program);
+
+	if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
+		console.error('Linker error for Vertex Shader', gl.getProgramInfoLog(program));
+		return;
+	}
+	if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
+		console.error('Linker error for fragment Shader');
+		return;
+	}
+
 };
 
