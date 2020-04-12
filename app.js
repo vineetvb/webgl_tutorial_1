@@ -95,6 +95,12 @@ var InitDemo = function() {
 	gl.shaderSource(fragmentShader, fragmentShaderText);
 
 	gl.compileShader(vertexShader);
+	if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+		console.error('Error compiling vertex Shader')
+	}
 	gl.compileShader(fragmentShader);
+		if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+		console.error('Error compiling fragment Shader')
+	}
 };
 
