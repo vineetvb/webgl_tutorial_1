@@ -24,28 +24,25 @@
 	- opengl has its own coordinate system
 */
 
-// This is a Vertex Shader specified in-line with JS.
-var vertexShaderText = [
-'precision mediump float;',
-'',
-'attribute vec2 vertPosition;',
-'',
-'void main()',
-'{',
-	' gl_Position = vec4(vertPosition, 0.0, 1.0);',
-'}',
-].join('\n');
+var vertexShaderText = `
+precision mediump float;
+attribute vec2 vertPosition;
+attribute vec3 vertColor;
+varying vec3 fragColor;
+void main()
+{
+	gl_Position = vec4(vertPosition, 0.0, 1.0);
+}`
 // -----------------------------------------
 
 // This is a Fragment Shader specified in-line with JS.
-var fragmentShaderText = [
-'precision mediump float;',
-'',
-'void main()',
-'{',
-	' gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);',
-'}',
-].join('\n');
+var fragmentShaderText = `
+precision mediump float;
+varying vec3 fragColor;
+void main()
+{
+	gl_FragColor = vec4(fragColor, 0.8);
+}`
 
 var InitDemo = function() {
 	console.log('This wrks');	
@@ -126,9 +123,9 @@ var InitDemo = function() {
 	// Create Buffer
 	// Basic triangle, without color.
 	var triangleVertices = [
-	0.0, 0.5,
-	-0.5, -0.5,
-	0.5, -0.5
+	0.0, 0.5, 1.0, 1.0, 0.0,
+	-0.5, -0.5, 1.0, 0.5, 0.5,
+	0.5, -0.5, 0.0, 1.0, 0.0,
 	] // CCW ordering
 
 	var triangleVertexBuffer = gl.createBuffer(); // << memory alloc on GPU
@@ -138,16 +135,28 @@ var InitDemo = function() {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
 
 	var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
+	var colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
+
 	gl.vertexAttribPointer(
 		positionAttribLocation, // Attribute Location
 		2, // number of elements per attribute
 		gl.FLOAT, // Type of elements
 		gl.FALSE,
-		2 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
+		5 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
 		0// offset from beginning of vertex list
 		);
 
+		gl.vertexAttribPointer(
+		colorAttribLocation, // Attribute Location
+		3, // number of elements per attribute
+		gl.FLOAT, // Type of elements
+		gl.FALSE,
+		5 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
+		2 * Float32Array.BYTES_PER_ELEMENT// offset from beginning of vertex list
+		);
+
 	gl.enableVertexAttribArray(positionAttribLocation);
+	gl.enableVertexAttribArray(colorAttribLocation);
 
 	gl.useProgram(program);
 	gl.drawArrays(gl.TRIANGLES, 0, 3);
