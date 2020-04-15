@@ -26,13 +26,16 @@
 
 var vertexShaderText = `
 precision mediump float;
-attribute vec2 vertPosition;
+attribute vec3 vertPosition;
 attribute vec3 vertColor;
 varying vec3 fragColor;
+uniform mat4 mWorld; // cube rotation in 3D space
+uniform mat4 mView; 
+uniform mat4 mProj; 
 void main()
 {
 	fragColor = vertColor;
-	gl_Position = vec4(vertPosition, 0.0, 1.0);
+	gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
 }`
 // -----------------------------------------
 
@@ -124,9 +127,10 @@ var InitDemo = function() {
 	// Create Buffer
 	// Basic triangle, without color.
 	var triangleVertices = [
-	-1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, 1.0, 0.0, 0.0, 0.0,
-	1.0, 0.0, 0.0, 1.0, 0.0,
+	// XYZ           RGB
+	-1.0, -1.0, 2.0, 1.0, 1.0, 1.0,
+	 1.0,  2.0, 7.0, 0.0, 0.0, 0.0,
+	 1.0,  0.0, 0.0, 0.0, 1.0, 0.0,
 	] // CCW ordering, seems CW to me
 
 	var triangleVertexBuffer = gl.createBuffer(); // << memory alloc on GPU
@@ -143,7 +147,7 @@ var InitDemo = function() {
 		2, // number of elements per attribute
 		gl.FLOAT, // Type of elements
 		gl.FALSE,
-		5 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
+		6 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
 		0// offset from beginning of vertex list
 		);
 
@@ -152,21 +156,62 @@ var InitDemo = function() {
 		3, // number of elements per attribute
 		gl.FLOAT, // Type of elements
 		gl.FALSE,
-		5 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
-		2 * Float32Array.BYTES_PER_ELEMENT// offset from beginning of vertex list
+		6 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
+		3 * Float32Array.BYTES_PER_ELEMENT// offset from beginning of vertex list
 		);
 
 	gl.enableVertexAttribArray(positionAttribLocation);
 	gl.enableVertexAttribArray(colorAttribLocation);
 
+	// Tell OpenGL state machine which program is active.
 	gl.useProgram(program);
+
+	var matWorldUniformLocation = gl.getUniformLocation(program, 'mWorld');
+	var matViewUniformLocation = gl.getUniformLocation(program, 'mView');
+	var matProjUniformLocation = gl.getUniformLocation(program, 'mProj');
+
+	var projMatrix = new Float32Array(16);
+	var viewMatrix = new Float32Array(16);
+	var worldMatrix = new Float32Array(16);
+	glMatrix.mat4.identity(worldMatrix);
+	glMatrix.mat4.identity(viewMatrix);
+	glMatrix.mat4.lookAt(viewMatrix, [0, 0, -5], [0, 0, 0], [0, 1, 0]);
+	glMatrix.mat4.identity(projMatrix);
+	glMatrix.mat4.perspective(projMatrix, 3.15159 * 45.0/180.0, canvas.width/canvas.height, 0.1, 1000.0)
+
+	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix); // second argument: Set to True to transpose the matrix.
+	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
+	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
+
+
 	gl.frontFace(gl.CW);
-	gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+	// 
+	// Main Render Loop
+	// 
 
-	// var loop = function(){
+	var angle = 0;
+	var identityMatrix = new Float32Array(16);
+	glMatrix.mat4.identity(identityMatrix);
+	var loop = function(){
+		
+		// rotation angle
+		// angle = performance.now() / 1000 / 6 / 2 * Math.PI;
+		// glMatrix.mat4.rotate(worldMatrix, identityMatrix, angle, [0, 1, 0]);
+
+		angle = -0.05;
+		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [1, 0.9, 0]);
+		
+
+		// set values and render.
+		gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix); // second argument: Set to True to transpose the matrix.
+		gl.clearColor(1.0, 1.0, 1.0, 1.0 );
+		gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
+		gl.drawArrays(gl.TRIANGLES, 0, 3);
+		requestAnimationFrame(loop);
 	// 	updateworld();
 	// 	renderworld();
-	// }
+	}
+	requestAnimationFrame(loop);
 };
 
