@@ -1,6 +1,10 @@
 /*
-- OpenGL is a state machine
-	- context is the tool that calls graphics fns, eg.g clear screen
+- OpenGL is a state machine, a collection of variables that define how OpenGL should currently operate. 
+	- This is known as the OpenGL 'context'
+	- is the tool that calls graphics fns, eg.g clear screen
+
+	- There are several state-changing functions that change the context 
+	-  Several state-using functions that perform some operations based on context
 
 
 - Sends stuff to graphics card
@@ -20,7 +24,7 @@
 	- opengl has its own coordinate system
 */
 
-
+// This is a Vertex Shader specified in-line with JS.
 var vertexShaderText = [
 'precision mediump float;',
 '',
@@ -29,11 +33,11 @@ var vertexShaderText = [
 'void main()',
 '{',
 	' gl_Position = vec4(vertPosition, 0.0, 1.0);',
-
 '}',
 ].join('\n');
-
 // -----------------------------------------
+
+// This is a Fragment Shader specified in-line with JS.
 var fragmentShaderText = [
 'precision mediump float;',
 '',
