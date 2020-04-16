@@ -128,31 +128,43 @@ var InitDemo = function() {
 	// Basic triangle, without color.
 	var boxVertices = [
 	// XYZ           RGB
-	0.0, 0.0, 0.0, 1.0, 0.0, 1.0, // 0
+	0.0, 0.0, 0.0, 1.0, 1.0, 1.0, // 0
 	1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // 1
-	1.0, 0.0, 1.0, 0.0, 1.0, 1.0, // 2
+	1.0, 0.0, 1.0, 0.0, 0.0, 0.0, // 2
 	0.0, 0.0, 1.0, 0.0, 0.0, 0.0, // 3
 
 	0.0, 1.0, 0.0, 1.0, 0.0, 0.0, // 4
 	1.0, 1.0, 0.0, 0.0, 1.0, 1.0, // 5
-	1.0, 1.0, 1.0, 1.0, 0.0, 0.0, // 6
-	0.0, 1.0, 1.0, 0.0, 1.0, 1.0, // 7
+	1.0, 1.0, 1.0, 0.0, 0.0, 0.0, // 6
+	0.0, 1.0, 1.0, 0.0, 0.0, 0.0, // 7
 	] // CCW ordering, seems CW to me
 
 	var boxIndices = [
-	0, 1, 5,
-	0, 5, 4,		// face
-	4, 0, 7,
-	0, 7, 3,		// face
-	2, 0, 3, 
-	0, 1, 2,	// face
-	4, 5, 6,
-	4, 6, 7,	// face
-	2, 3, 6,
-	3, 6, 7, 	// face
-	1, 2, 6,
-	1, 5, 6
+	1, 0, 5,
+	0, 4, 5,		// face
+
+	3, 7, 0,
+	7, 4, 0,
+
+	3, 0, 2, 
+	2, 0, 1,	// face
+	// 4, 5, 6,
+	7, 6, 4,	// face
+	6, 5, 4,
+
+	2, 1, 6,
+	6, 1, 5,
+
+	3, 2, 6, 
+	3, 6, 7
 	]
+
+	var boxColors = [
+	// XYZ           RGB
+	1.0, 0.0, 0.0, // R
+	0.0, 1.0, 0.0, // G
+	0.0, 0.0, 1.0, // 2
+	] // CCW ordering, seems CW to me
 
 	var boxVertexBuffer = gl.createBuffer(); // << memory alloc on GPU
 	// Bind newly created buffer
@@ -203,7 +215,7 @@ var InitDemo = function() {
 	var worldMatrix = new Float32Array(16);
 	glMatrix.mat4.identity(worldMatrix);
 	glMatrix.mat4.identity(viewMatrix);
-	glMatrix.mat4.lookAt(viewMatrix, [0, 0, -15], [0, 0, 0], [0, 1, 0]);
+	glMatrix.mat4.lookAt(viewMatrix, [1, 2, -3], [0.2, 0.1, 0], [0, 1, 0]);
 	glMatrix.mat4.identity(projMatrix);
 	glMatrix.mat4.perspective(projMatrix, 3.15159 * 45.0/180.0, canvas.width/canvas.height, 0.1, 1000.0)
 
@@ -224,7 +236,7 @@ var InitDemo = function() {
 		gl.clearColor(0.0, 0.0, 0.2, 1.0 );
 		gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
 		// rotation angle
-		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [0.0, 1.0, 0.0]);
+		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [0.1, 1.0, 0.0]);
 		
 		// set values and render.
 		gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix); // second argument: Set to True to transpose the matrix.
