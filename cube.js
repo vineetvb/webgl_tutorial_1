@@ -74,8 +74,8 @@ var InitDemo = function() {
 	gl.clearColor(0.8, 0.8, 0.8, 1.0);
 	// Then actually clear both buffers.
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-	// We now 
+	gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.CULL_FACE);
 
 	// There are multiple buffers that a graphics application uses.
 	// e.g. color buffer, depth buffer etc
@@ -126,25 +126,53 @@ var InitDemo = function() {
 
 	// Create Buffer
 	// Basic triangle, without color.
-	var triangleVertices = [
+	var boxVertices = [
 	// XYZ           RGB
-	-1.0, -1.0, 2.0, 1.0, 1.0, 1.0,
-	 1.0,  2.0, 7.0, 0.0, 0.0, 0.0,
-	 1.0,  0.0, 0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0, 0.0, 1.0, // 0
+	1.0, 0.0, 0.0, 1.0, 0.0, 0.0, // 1
+	1.0, 0.0, 1.0, 0.0, 1.0, 1.0, // 2
+	0.0, 0.0, 1.0, 0.0, 0.0, 0.0, // 3
+
+	0.0, 1.0, 0.0, 1.0, 0.0, 0.0, // 4
+	1.0, 1.0, 0.0, 0.0, 1.0, 1.0, // 5
+	1.0, 1.0, 1.0, 1.0, 0.0, 0.0, // 6
+	0.0, 1.0, 1.0, 0.0, 1.0, 1.0, // 7
 	] // CCW ordering, seems CW to me
 
-	var triangleVertexBuffer = gl.createBuffer(); // << memory alloc on GPU
+	var boxIndices = [
+	0, 1, 5,
+	0, 5, 4,		// face
+	4, 0, 7,
+	0, 7, 3,		// face
+	2, 0, 3, 
+	0, 1, 2,	// face
+	4, 5, 6,
+	4, 6, 7,	// face
+	2, 3, 6,
+	3, 6, 7, 	// face
+	1, 2, 6,
+	1, 5, 6
+	]
+
+	var boxVertexBuffer = gl.createBuffer(); // << memory alloc on GPU
 	// Bind newly created buffer
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBuffer);
+	gl.bindBuffer(gl.ARRAY_BUFFER, boxVertexBuffer);
 	// buffers triangle data to last bound buffer object
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW);
+
+	var boxIndexBuffer = gl.createBuffer(); // << memory alloc on GPU
+	// Bind newly created buffer
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boxIndexBuffer);
+	// buffers triangle index data to last bound buffer object
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STATIC_DRAW);
+
 
 	var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
 	var colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
 
 	gl.vertexAttribPointer(
 		positionAttribLocation, // Attribute Location
-		2, // number of elements per attribute
+		3, // number of elements per attribute
 		gl.FLOAT, // Type of elements
 		gl.FALSE,
 		6 * Float32Array.BYTES_PER_ELEMENT, // Size of individual vertex
@@ -175,7 +203,7 @@ var InitDemo = function() {
 	var worldMatrix = new Float32Array(16);
 	glMatrix.mat4.identity(worldMatrix);
 	glMatrix.mat4.identity(viewMatrix);
-	glMatrix.mat4.lookAt(viewMatrix, [0, 0, -5], [0, 0, 0], [0, 1, 0]);
+	glMatrix.mat4.lookAt(viewMatrix, [0, 0, -15], [0, 0, 0], [0, 1, 0]);
 	glMatrix.mat4.identity(projMatrix);
 	glMatrix.mat4.perspective(projMatrix, 3.15159 * 45.0/180.0, canvas.width/canvas.height, 0.1, 1000.0)
 
@@ -184,30 +212,23 @@ var InitDemo = function() {
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 
 
-	gl.frontFace(gl.CW);
 
-	// 
 	// Main Render Loop
 	// 
 
-	var angle = 0;
+	var angle = -0.05;
 	var identityMatrix = new Float32Array(16);
 	glMatrix.mat4.identity(identityMatrix);
 	var loop = function(){
 		
+		gl.clearColor(0.0, 0.0, 0.2, 1.0 );
+		gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
 		// rotation angle
-		// angle = performance.now() / 1000 / 6 / 2 * Math.PI;
-		// glMatrix.mat4.rotate(worldMatrix, identityMatrix, angle, [0, 1, 0]);
-
-		angle = -0.05;
-		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [1, 0.9, 0]);
+		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [0.0, 1.0, 0.0]);
 		
-
 		// set values and render.
 		gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix); // second argument: Set to True to transpose the matrix.
-		gl.clearColor(1.0, 1.0, 1.0, 1.0 );
-		gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
-		gl.drawArrays(gl.TRIANGLES, 0, 3);
+		gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
 		requestAnimationFrame(loop);
 	// 	updateworld();
 	// 	renderworld();
