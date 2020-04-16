@@ -229,6 +229,8 @@ var InitDemo = function() {
 	// 
 
 	var angle = -0.05;
+	var x_axis = 0.1;
+	adder = 0.01;
 	var identityMatrix = new Float32Array(16);
 	glMatrix.mat4.identity(identityMatrix);
 	var loop = function(){
@@ -236,14 +238,18 @@ var InitDemo = function() {
 		gl.clearColor(0.0, 0.0, 0.2, 1.0 );
 		gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
 		// rotation angle
-		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [0.1, 1.0, 0.0]);
+		x_axis += adder;
+		if (x_axis > 0.95)
+			adder = Math.sin(-adder)
+		if (x_axis < 0.05)
+			adder = Math.sin(-adder)
+		glMatrix.mat4.rotate(worldMatrix, worldMatrix, angle, [x_axis, 1.0, 0.0]);
 		
 		// set values and render.
 		gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix); // second argument: Set to True to transpose the matrix.
 		gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0);
 		requestAnimationFrame(loop);
-	// 	updateworld();
-	// 	renderworld();
+
 	}
 	requestAnimationFrame(loop);
 };
